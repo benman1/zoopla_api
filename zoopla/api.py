@@ -1,4 +1,4 @@
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import lxml.etree
 import os
 
@@ -6,6 +6,7 @@ from zoopla import validate, ZooplaError
 
 
 URL = "http://api.zoopla.co.uk/api/v1/property_listings"
+# URL = "http://api.zoopla.co.uk/api/v1/average_sold_prices"
 
 
 class ListingStatus(object):
@@ -43,11 +44,11 @@ class ZooplaQuery(object):
         :return: list of dicts
         """
         try:
-            request = urllib2.Request(the_request_url, headers={"Accept": "application/xml"})
-            response = urllib2.urlopen(request)
+            request = urllib.request.Request(the_request_url, headers={"Accept": "application/xml"})
+            response = urllib.request.urlopen(request)
             tree = lxml.etree.fromstring(response.read())
-        except urllib2.HTTPError as ex:
-            raise ZooplaError('The API has not been set. Set the following environ variable: ZOOPLA_API_KEY')
+        except urllib.error.HTTPError as ex:
+            raise ZooplaError('{}. The API has not been set. Set the following environ variable: ZOOPLA_API_KEY'.format(ex))
 
         items = []
         for listing in tree.iter('listing'):
@@ -89,7 +90,7 @@ class ZooplaQuery(object):
         :return: string
         """
 
-        filters = ['{0}={1}'.format(the_key, the_value) for the_key, the_value in filters.items()]
+        filters = ['{0}={1}'.format(the_key, the_value) for the_key, the_value in list(filters.items())]
         return '{url}?{filters}&summarised=yes'.format(url=URL, filters='&'.join(filters))
 
 
